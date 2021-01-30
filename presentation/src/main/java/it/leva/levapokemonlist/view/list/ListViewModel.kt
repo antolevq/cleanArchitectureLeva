@@ -20,6 +20,9 @@ class ListViewModel(
 
     private val pokelist = MutableLiveData<DataState<PokemonListViewState>>()
     fun getPokeList() = pokelist
+    private val additionalPokeItems = MutableLiveData<DataState<PokemonListViewState>>()
+    fun getAdditionalPokeItems() = additionalPokeItems
+
 
 
     fun fetchList() {
@@ -28,6 +31,13 @@ class ListViewModel(
                 pokelist.postValue(it)
             }
         }
+    }
 
+    fun getNextPage(url: String) {
+        viewModelScope.launch {
+            getPokemonNextPageListUseCase.invoke(url).collect {
+                additionalPokeItems.postValue(it)
+            }
+        }
     }
 }

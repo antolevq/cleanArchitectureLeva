@@ -9,7 +9,9 @@ import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
 import it.leva.domain.model.Pokemon
 import it.leva.domain.state.DataState
+import it.leva.domain.viewstate.PokemonListViewState
 import it.leva.levapokemonlist.R
+import it.leva.levapokemonlist.extension.scrollListener
 import it.leva.levapokemonlist.view.list.adapter.MainListAdapter
 import org.koin.android.viewmodel.ext.android.viewModel
 
@@ -18,6 +20,7 @@ class PokemonListFragment : Fragment() {
     var mView: View? = null
     val viewmodel: ListViewModel by viewModel()
     var adapter: MainListAdapter? = null
+    var recylerView: RecyclerView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,8 +37,25 @@ class PokemonListFragment : Fragment() {
             when (dataState) {
                 is DataState.SUCCESS -> {
                     dataState.data?.let {
-                        it.pokemonList?.let { safePokeList ->
-                            initView(safePokeList)
+                        initView(it)
+
+                    }
+                }
+                is DataState.ERROR -> {
+
+                }
+                is DataState.LOADING -> {
+
+                }
+            }
+        })
+
+        viewmodel.getAdditionalPokeItems().observe(viewLifecycleOwner, { dataState ->
+            when (dataState) {
+                is DataState.SUCCESS -> {
+                    dataState.data?.let {
+                        it.pokemonList?.let { additionaPokeItems ->
+                            adapter?.addItemsToList(additionaPokeItems)
                         }
                     }
                 }
@@ -49,17 +69,26 @@ class PokemonListFragment : Fragment() {
         })
     }
 
-    private fun initView(pokeList: List<Pokemon>) {
-        adapter = MainListAdapter(pokeList) { name, url ->
-            val action =
-                PokemonListFragmentDirections.actionPokemonListFragmentToPokemonDetailFragment(
-                    name,
-                    url
-                )
-            mView?.let { Navigation.findNavController(it).navigate(action) }
+    private fun initView(pokemonListViewState: PokemonListViewState) {
+        pokemonListViewState.pokemonList?.let {
+            adapter = MainListAdapter(it.toMutableList()) { name, url ->
+                val action =
+                    PokemonListFragmentDirections.actionPokemonListFragmentToPokemonDetailFragment(
+                        name,
+                        url
+                    )
+                mView?.let { Navigation.findNavController(it).navigate(action) }
 
+            }
+            recylerView = mView?.findViewById<RecyclerView>(R.id.rvPokemonList)
+            recylerView?.adapter = adapter
+            recylerView?.scrollListener {
+                pokemonListViewState.nextPage?.let { url ->
+                    viewmodel.getNextPage(url)
+                }
+
+            }
         }
-        mView?.findViewById<RecyclerView>(R.id.rvPokemonList)?.adapter = adapter
     }
 
     override fun onCreateView(

@@ -13,9 +13,9 @@ import it.leva.domain.model.Pokemon
 import it.leva.levapokemonlist.R
 
 class MainListAdapter(
-    private var pokemonList: List<Pokemon>,
+    private var pokemonList: MutableList<Pokemon>,
     val onClick: (name: String, url: String) -> Unit
-) : PagingDataAdapter<Pokemon,MainListAdapter.PokemonViewHolder>(PokemonComparator) {
+) : PagingDataAdapter<Pokemon, MainListAdapter.PokemonViewHolder>(PokemonComparator) {
 
 
     inner class PokemonViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -39,7 +39,12 @@ class MainListAdapter(
 
     override fun getItemCount() = pokemonList.size
 
-    object PokemonComparator: DiffUtil.ItemCallback<Pokemon>() {
+    fun addItemsToList(additionalItems: List<Pokemon>) {
+        pokemonList.addAll(additionalItems)
+        notifyDataSetChanged()
+    }
+
+    object PokemonComparator : DiffUtil.ItemCallback<Pokemon>() {
         override fun areItemsTheSame(oldItem: Pokemon, newItem: Pokemon): Boolean {
             return oldItem.name == newItem.name
         }
