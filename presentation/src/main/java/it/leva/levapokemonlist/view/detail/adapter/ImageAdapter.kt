@@ -25,7 +25,9 @@ class ImageAdapter(private val images: List<String?>?, private val context: Cont
     override fun onBindViewHolder(holder: StatsViewHolder, position: Int) {
         images?.get(position)?.let { image ->
             if (image.isNotEmpty())
-                holder.img.loadImage(context, image)
+                holder.img.loadImage(context, image){
+
+                }
         }
 
     }
