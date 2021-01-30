@@ -3,7 +3,7 @@ package it.leva.domain.state
 sealed class DataState<T>(
     var loading: Boolean,
     var data: T? = null,
-    var stateMessage: StateMessage? = null
+    var errorMessage: String?=null
 ) {
     class LOADING<T>(
         isLoading: Boolean,
@@ -15,18 +15,18 @@ sealed class DataState<T>(
 
     class SUCCESS<T>(
         data: T? = null,
-        stateMessage: StateMessage? = null
+        errorMessage: String?=null
     ) : DataState<T>(
         loading = false,
         data = data,
-        stateMessage = stateMessage
-    )
+        errorMessage = errorMessage
+)
 
     class ERROR<T>(
-        stateMessage: StateMessage
+        errorMessage: String
     ) : DataState<T>(
         loading = false,
         data = null,
-        stateMessage = stateMessage
+        errorMessage = errorMessage
     )
 }

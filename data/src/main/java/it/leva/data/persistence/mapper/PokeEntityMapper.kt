@@ -11,6 +11,7 @@ class PokeEntityMapper {
     fun mapToEntity(from: BaseResponse) =
         PokeEntity(
             name = from.name,
-            url = from.url
+            url = from.url,
+            cached = false
         )
 }

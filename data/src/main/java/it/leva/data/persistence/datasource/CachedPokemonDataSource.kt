@@ -11,7 +11,8 @@ interface CachedPokemonDataSource {
     fun deletePokemon(pokeEntity: PokeEntity)
     suspend fun getAllPokemon(idList: List<String>): List<PokemonWithRelationsEntity>
     suspend fun getAllPokemon(): List<PokemonWithRelationsEntity>
-    suspend fun getPokemon(name: String): PokemonWithRelationsEntity
+    suspend fun getPokemon(name: String): PokemonWithRelationsEntity?
+    fun setPokemonAsCached(name:String)
 
 
 }

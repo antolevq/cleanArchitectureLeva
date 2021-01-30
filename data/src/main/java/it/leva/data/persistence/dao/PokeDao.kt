@@ -27,5 +27,8 @@ interface PokeDao {
 
     @Transaction
     @Query("SELECT * FROM pokemon WHERE name = :name")
-    suspend fun getPokemon(name: String): PokemonWithRelationsEntity
+    suspend fun getPokemon(name: String): PokemonWithRelationsEntity?
+
+    @Query("UPDATE pokemon SET cached = 1 where name = :name")
+    fun setPokemonAsChecked(name:String)
 }

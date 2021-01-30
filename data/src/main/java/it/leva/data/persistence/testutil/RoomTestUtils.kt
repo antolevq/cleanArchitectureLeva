@@ -10,7 +10,8 @@ object RoomTestUtils {
 
     fun createPokemon(name: String) = PokeEntity(
         name = name,
-        url = ""
+        url = "",
+        cached = false
     )
 
     fun createTypes(count: Int, name: String) =

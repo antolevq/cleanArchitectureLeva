@@ -60,7 +60,11 @@ class CachedPokemonDataSourceImpl(
         return pokeDao.getAllPokemon()
     }
 
-    override suspend fun getPokemon(name: String): PokemonWithRelationsEntity {
+    override suspend fun getPokemon(name: String): PokemonWithRelationsEntity? {
         return pokeDao.getPokemon(name)
+    }
+
+    override fun setPokemonAsCached(name: String) {
+        pokeDao.setPokemonAsChecked(name)
     }
 }

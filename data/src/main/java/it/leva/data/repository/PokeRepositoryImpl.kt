@@ -1,15 +1,15 @@
 package it.leva.data.repository
 
-import androidx.paging.PageKeyedDataSource
+import android.util.Log
 import it.leva.data.network.dto.BaseResponse
 import it.leva.data.network.dto.PokeDetailDTO
-import it.leva.data.network.dto.PokeItemDTO
+import it.leva.data.network.dto.PokeListDTO
 import it.leva.data.network.services.PokeService
 import it.leva.data.persistence.datasource.CachedPokemonDataSource
 import it.leva.data.persistence.mapper.*
-import it.leva.domain.model.Pokemon
 import it.leva.domain.repository.PokeRepository
 import it.leva.domain.state.DataState
+import it.leva.domain.state.StateMessage
 import it.leva.domain.viewstate.PokemonListViewState
 import it.leva.domain.viewstate.PokemonViewState
 import kotlinx.coroutines.Dispatchers
@@ -25,30 +25,35 @@ class PokeRepositoryImpl(
     private val statEntityEntityMapper: StatEntityEntityMapper,
     private val spritesAndImagesEntityMapper: SpritesAndImagesEntityMapper,
     private val typeEntityEntityMapper: TypeEntityEntityMapper
-) : PokeRepository, PageKeyedDataSource<String, Pokemon>() {
+) : PokeRepository {
     override fun getPokemonList(
         limit: Int,
         offset: Int
     ): Flow<DataState<PokemonListViewState>> {
         return flow {
-
-            val pokeRemoteList = pokeService.getPokeList(limit = limit, offset = offset)
+            var pokeRemoteList: PokeListDTO? = null
             var nextPage: String? = null
-            if (pokeRemoteList.pokeListDTO.isNullOrEmpty().not()) {
-                nextPage = pokeRemoteList.nextPage
-                insertIntoDatabase(pokeRemoteList.pokeListDTO)
+            try {
+                pokeRemoteList = pokeService.getPokeList(limit = limit, offset = offset)
+
+                if (pokeRemoteList.pokeListDTO.isNullOrEmpty().not()) {
+                    nextPage = pokeRemoteList.nextPage
+                    insertIntoDatabase(pokeRemoteList.pokeListDTO)
+                }
+            } catch (e: Exception) {
+                Log.d("PokeRepositoryImpl", e.message ?: "")
             }
+
             emit(
                 DataState.SUCCESS(
                     PokemonListViewState(
                         pokemonWithRelationsEntityMapper
                             .mapToDomain(
-                                if (pokeRemoteList.pokeListDTO.isNullOrEmpty().not()) {
-                                    cachedPokemonDataSource.getAllPokemon(pokeRemoteList.pokeListDTO.map { it.name })
+                                if (pokeRemoteList?.pokeListDTO.isNullOrEmpty().not()) {
+                                    cachedPokemonDataSource.getAllPokemon(pokeRemoteList?.pokeListDTO!!.map { it.name })
                                 } else {
                                     cachedPokemonDataSource.getAllPokemon()
                                 }
-
                             ),
                         nextPage
                     )
@@ -59,46 +64,71 @@ class PokeRepositoryImpl(
 
     override fun getNextPokemon(nextUrl: String): Flow<DataState<PokemonListViewState>> {
         return flow {
-
-            val pokeRemoteList = pokeService.getPokeListFromUrl(nextUrl)
+            var pokeRemoteList: PokeListDTO? = null
             var nextPage: String? = null
-            if (pokeRemoteList.pokeListDTO.isNullOrEmpty().not()) {
-                nextPage = pokeRemoteList.nextPage
-                insertIntoDatabase(pokeRemoteList.pokeListDTO)
+            var errorMessage: String = ""
+            try {
+                pokeRemoteList = pokeService.getPokeListFromUrl(nextUrl)
+                if (pokeRemoteList.pokeListDTO.isNullOrEmpty().not()) {
+                    nextPage = pokeRemoteList.nextPage
+                    insertIntoDatabase(pokeRemoteList.pokeListDTO)
+                }
+            } catch (e: Exception) {
+                errorMessage = e.message ?: "Error during informations download!"
             }
-            emit(
-                DataState.SUCCESS(
-                    PokemonListViewState(
-                        pokemonWithRelationsEntityMapper
-                            .mapToDomain(
-                                if (pokeRemoteList.pokeListDTO.isNullOrEmpty().not()) {
-                                    cachedPokemonDataSource.getAllPokemon(pokeRemoteList.pokeListDTO.map { it.name })
-                                } else {
-                                    cachedPokemonDataSource.getAllPokemon()
-                                }
 
-                            ),
-                        nextPage
+            emit(
+                if (errorMessage.isEmpty()) {
+                    DataState.SUCCESS(
+                        PokemonListViewState(
+                            pokemonWithRelationsEntityMapper
+                                .mapToDomain(
+                                    if (pokeRemoteList?.pokeListDTO.isNullOrEmpty().not()) {
+                                        cachedPokemonDataSource.getAllPokemon(pokeRemoteList!!.pokeListDTO.map { it.name })
+                                    } else {
+                                        cachedPokemonDataSource.getAllPokemon()
+                                    }
+                                ),
+                            nextPage
+                        )
                     )
-                )
+                } else {
+                    DataState.ERROR(
+                        errorMessage
+                    )
+                }
             )
         }.flowOn(Dispatchers.IO)
     }
 
     override fun getPokemonDetail(name: String, url: String): Flow<DataState<PokemonViewState>> {
         return flow {
-            val pokemonDto = pokeService.getPokeDetail(url)
-            insertIntoDatabase(pokemonDto, url)
+            var errorMessage = ""
+            try {
+                val pokemonDto = pokeService.getPokeDetail(url)
+                insertIntoDatabase(pokemonDto, url)
+            } catch (e: Exception) {
+                errorMessage = e.message ?: "Error during informations download!"
+            }
+            val cachedPokemon = cachedPokemonDataSource.getPokemon(name)
             emit(
-                DataState.SUCCESS(
-                    PokemonViewState(
-                        pokemonWithRelationsEntityMapper
-                            .mapToDomain(
-                                cachedPokemonDataSource.getPokemon(name)
-                            )
+                if (cachedPokemon != null && cachedPokemon.pokeEntity.cached) {
+                    DataState.SUCCESS(
+                        PokemonViewState(
+                            pokemonWithRelationsEntityMapper
+                                .mapToDomain(
+                                    cachedPokemon
+                                )
+                        )
                     )
-                )
+                } else {
+                    DataState.ERROR(
+                        errorMessage
+                    )
+                }
+
             )
+
         }.flowOn(Dispatchers.IO)
     }
 
@@ -118,6 +148,7 @@ class PokeRepositoryImpl(
             spritesEntity.fkPoke = poke.name
 
             cachedPokemonDataSource.insertPokemon(pEntity)
+            cachedPokemonDataSource.setPokemonAsCached(pEntity.name)
             cachedPokemonDataSource.insertAllStats(statsEntity)
             cachedPokemonDataSource.insertAllTypes(typesEntity)
             cachedPokemonDataSource.insertSpritesAndImage(spritesEntity)
@@ -126,21 +157,6 @@ class PokeRepositoryImpl(
 
     private suspend fun insertIntoDatabase(list: List<BaseResponse>) {
         cachedPokemonDataSource.insertAllPokemon(pokeEntityMapper.mapToEntity(list))
-    }
-
-    override fun loadAfter(params: LoadParams<String>, callback: LoadCallback<String, Pokemon>) {
-        TODO("Not yet implemented")
-    }
-
-    override fun loadBefore(params: LoadParams<String>, callback: LoadCallback<String, Pokemon>) {
-        TODO("Not yet implemented")
-    }
-
-    override fun loadInitial(
-        params: LoadInitialParams<String>,
-        callback: LoadInitialCallback<String, Pokemon>
-    ) {
-        TODO("Not yet implemented")
     }
 
 
