@@ -7,18 +7,14 @@ This simple application shows the list of pokemon with their details
 ##### This icon is used for all those items not yet downloaded. If it is opened without internet connection, an error view is shown.
 ![N|Solid](https://raw.githubusercontent.com/antolevq/applyJobAssignment/master/presentation/src/main/res/drawable/closed.png) 
 
-\
-\
-\
-
-
+## Multi module application
 The application consists of 3 modules:
 
   - Data: To find information
   - Domain: Business logic
   - Presentation: To show on device
   
-\
+## Used dependency
 
 Here the list of al the dependency of the application:
   - Glide
@@ -30,3 +26,8 @@ Here the list of al the dependency of the application:
   - Room
   - Robolectric
   
+  ## Architecture
+Clean architecture + MVVM + MVI
+  
+  ## Test coverage
+The only integrated Unit test, is located in the Data module and was used to test the correct relationships between the tables (oneToMany & oneToOne)
