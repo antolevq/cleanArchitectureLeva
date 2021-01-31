@@ -68,9 +68,9 @@ class EntityWriteAndReadTest {
 
             val res = pokeDao.getAllPokemon().first()
             assert(
-                res.statEntityList.size == counter
-                        && res.typeEntityList.size == counter
-                        && res.spritesAndImagesEntity.fkPoke == pokeName
+                res.statEntityList?.size == counter
+                        && res.typeEntityList?.size == counter
+                        && res.spritesAndImagesEntity?.fkPoke == pokeName
             )
         }
 
