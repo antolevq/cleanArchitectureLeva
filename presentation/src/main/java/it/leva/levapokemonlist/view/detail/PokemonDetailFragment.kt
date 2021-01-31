@@ -18,19 +18,17 @@ import it.leva.domain.state.DataState
 import it.leva.levapokemonlist.R
 import it.leva.levapokemonlist.extension.loadImage
 import it.leva.levapokemonlist.view.MainActivity
+import it.leva.levapokemonlist.view.base.BaseFragment
 import it.leva.levapokemonlist.view.detail.adapter.ImageAdapter
 import it.leva.levapokemonlist.view.detail.adapter.StatsAdapter
 import org.koin.android.viewmodel.ext.android.viewModel
 
-class PokemonDetailFragment : Fragment() {
+class PokemonDetailFragment : BaseFragment() {
 
     var mView: View? = null
     val viewModel: DetailViewModel by viewModel()
     var url = ""
     var name = ""
-    var loadingAnimation: LottieAnimationView? = null
-    var containerView: ConstraintLayout? = null
-    var imageLoaded: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,47 +71,20 @@ class PokemonDetailFragment : Fragment() {
 
                 }
                 is DataState.ERROR -> {
-                    imageLoaded = true
-                    Toast.makeText(context, dataState.errorMessage, Toast.LENGTH_SHORT).show()
+                    showError(dataState.errorMessage ?: "")
                 }
                 is DataState.LOADING -> {
-
+                    showProgress()
                 }
             }
         })
     }
 
     fun initView() {
-        loadingAnimation = mView?.findViewById(R.id.loading_animation)
-        loadingAnimation?.addAnimatorListener(object :
-            Animator.AnimatorListener {
-            override fun onAnimationStart(p0: Animator?) {
-
-            }
-
-            override fun onAnimationEnd(p0: Animator?) {
-                if (imageLoaded) {
-                    loadingAnimation?.visibility = View.GONE
-                    containerView?.visibility = View.VISIBLE
-
-                } else {
-                    loadingAnimation?.progress = 0f
-                }
-
-            }
-
-            override fun onAnimationCancel(p0: Animator?) {
-
-            }
-
-            override fun onAnimationRepeat(p0: Animator?) {
-
-            }
-
-
-        })
-        containerView = mView?.findViewById(R.id.detail_container)
-        containerView?.visibility = View.GONE
+        mainLayout = mView?.findViewById(R.id.detail_container)
+        progressLayout = mView?.findViewById(R.id.progress_container)
+        errorLayout = mView?.findViewById(R.id.error_view_container)
+        txtErrorMessage = mView?.findViewById(R.id.txt_error_message)
     }
 
     fun refreshView(pokemon: Pokemon) {
@@ -123,7 +94,7 @@ class PokemonDetailFragment : Fragment() {
                     context,
                     pokemon.officialArtWorkDefault
                 ) {
-                    imageLoaded = true
+                    hideProgress()
                 }
                 findViewById<TextView>(R.id.txt_type).text = pokemon.getTypeText()
                 findViewById<TextView>(R.id.txt_pokemon_name).text = pokemon.name
@@ -134,6 +105,7 @@ class PokemonDetailFragment : Fragment() {
             }
         }
     }
+
 
     companion object {
 

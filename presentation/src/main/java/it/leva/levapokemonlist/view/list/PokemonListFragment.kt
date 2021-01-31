@@ -13,10 +13,11 @@ import it.leva.domain.state.DataState
 import it.leva.domain.viewstate.PokemonListViewState
 import it.leva.levapokemonlist.R
 import it.leva.levapokemonlist.extension.scrollListener
+import it.leva.levapokemonlist.view.base.BaseFragment
 import it.leva.levapokemonlist.view.list.adapter.MainListAdapter
 import org.koin.android.viewmodel.ext.android.viewModel
 
-class PokemonListFragment : Fragment() {
+class PokemonListFragment : BaseFragment() {
 
     var mView: View? = null
     val viewmodel: ListViewModel by viewModel()
@@ -29,6 +30,7 @@ class PokemonListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initView()
         viewmodel.fetchList()
         startObserver()
     }
@@ -37,16 +39,18 @@ class PokemonListFragment : Fragment() {
         viewmodel.getPokeList().observe(viewLifecycleOwner, { dataState ->
             when (dataState) {
                 is DataState.SUCCESS -> {
+                    hideProgress()
                     dataState.data?.let {
-                        initView(it)
+                        refreshView(it)
 
                     }
                 }
                 is DataState.ERROR -> {
+                    hideProgress()
 
                 }
                 is DataState.LOADING -> {
-
+                    showProgress()
                 }
             }
         })
@@ -70,7 +74,12 @@ class PokemonListFragment : Fragment() {
         })
     }
 
-    private fun initView(pokemonListViewState: PokemonListViewState) {
+    fun initView() {
+        mainLayout = mView?.findViewById(R.id.detail_container)
+        progressLayout = mView?.findViewById(R.id.progress_container)
+    }
+
+    private fun refreshView(pokemonListViewState: PokemonListViewState) {
         pokemonListViewState.pokemonList?.let {
             adapter = MainListAdapter(it.toMutableList()) { name, url ->
                 val action =

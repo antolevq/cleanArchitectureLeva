@@ -6,17 +6,13 @@
     android:layout_height="match_parent"
     tools:context=".view.detail.PokemonDetailFragment">
 
-    <com.airbnb.lottie.LottieAnimationView
-        android:id="@+id/loading_animation"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:elevation="1dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:lottie_autoPlay="true"
-        app:lottie_rawRes="@raw/loading_lottie" />
+    <include
+        layout="@layout/component_progress"
+        android:visibility="gone" />
+
+    <include
+        layout="@layout/component_error_view"
+        android:visibility="gone"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/detail_container"
@@ -75,7 +71,6 @@
                     android:layout_height="60dp"
                     android:layout_marginStart="20dp"
                     android:layout_marginTop="20dp"
-                    android:src="@drawable/closed"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 

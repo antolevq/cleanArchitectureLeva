@@ -10,7 +10,7 @@ import it.leva.data.persistence.entity.*
 
 @Database(
     entities = [PokeEntity::class, SpritesAndImagesEntity::class, StatEntity::class, TypeEntity::class],
-    version = 5
+    version = 1
 )
 abstract class AppDatabase: RoomDatabase() {
     abstract fun getPokeDao(): PokeDao

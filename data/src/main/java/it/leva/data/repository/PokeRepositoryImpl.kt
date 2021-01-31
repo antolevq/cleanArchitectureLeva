@@ -31,6 +31,11 @@ class PokeRepositoryImpl(
         offset: Int
     ): Flow<DataState<PokemonListViewState>> {
         return flow {
+            emit(
+                DataState.LOADING(
+                    isLoading = true
+                )
+            )
             var pokeRemoteList: PokeListDTO? = null
             var nextPage: String? = null
             try {
@@ -103,12 +108,18 @@ class PokeRepositoryImpl(
 
     override fun getPokemonDetail(name: String, url: String): Flow<DataState<PokemonViewState>> {
         return flow {
+
+            emit(
+                DataState.LOADING(
+                    isLoading = true
+                )
+            )
             var errorMessage = ""
             try {
                 val pokemonDto = pokeService.getPokeDetail(url)
                 insertIntoDatabase(pokemonDto, url)
             } catch (e: Exception) {
-                errorMessage = e.message ?: "Error during informations download!"
+                errorMessage = "This pokemon is not cached yet!\n\nError description: " + e.message
             }
             val cachedPokemon = cachedPokemonDataSource.getPokemon(name)
             emit(

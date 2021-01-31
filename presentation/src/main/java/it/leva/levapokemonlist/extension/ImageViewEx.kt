@@ -27,6 +27,7 @@ fun ImageView.loadImage(context: Context?, url: String?, loadedListener: () -> U
                         target: Target<Drawable>?,
                         isFirstResource: Boolean
                     ): Boolean {
+                        loadedListener()
                         return false
                     }
 
