@@ -10,15 +10,14 @@ This simple application shows the list of pokemon with their details
 \
 \
 \
-\
+
+
 The application consists of 3 modules:
 
   - Data: To find information
   - Domain: Business logic
   - Presentation: To show on device
   
-\
-\
 \
 
 Here the list of al the dependency of the application:
