@@ -23,6 +23,7 @@ class PokemonListFragment : BaseFragment() {
     val viewmodel: ListViewModel by viewModel()
     var adapter: MainListAdapter? = null
     var recylerView: RecyclerView? = null
+    var nextPageUrl: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,6 +60,7 @@ class PokemonListFragment : BaseFragment() {
             when (dataState) {
                 is DataState.SUCCESS -> {
                     dataState.data?.let {
+                        nextPageUrl = it.nextPage
                         it.pokemonList?.let { additionaPokeItems ->
                             adapter?.addItemsToList(additionaPokeItems)
                         }
@@ -80,6 +82,7 @@ class PokemonListFragment : BaseFragment() {
     }
 
     private fun refreshView(pokemonListViewState: PokemonListViewState) {
+        nextPageUrl = pokemonListViewState.nextPage
         pokemonListViewState.pokemonList?.let {
             adapter = MainListAdapter(it.toMutableList()) { name, url ->
                 val action =
@@ -93,7 +96,7 @@ class PokemonListFragment : BaseFragment() {
             recylerView = mView?.findViewById<RecyclerView>(R.id.rvPokemonList)
             recylerView?.adapter = adapter
             recylerView?.scrollListener {
-                pokemonListViewState.nextPage?.let { url ->
+                nextPageUrl?.let { url ->
                     viewmodel.getNextPage(url)
                 }
 
