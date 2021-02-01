@@ -9,7 +9,6 @@ import it.leva.data.persistence.datasource.CachedPokemonDataSource
 import it.leva.data.persistence.mapper.*
 import it.leva.domain.repository.PokeRepository
 import it.leva.domain.state.DataState
-import it.leva.domain.state.StateMessage
 import it.leva.domain.viewstate.PokemonListViewState
 import it.leva.domain.viewstate.PokemonViewState
 import kotlinx.coroutines.Dispatchers
