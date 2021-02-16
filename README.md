@@ -1,4 +1,4 @@
-# Leva Assignment
+# Clean architecture by Leva
 
 This simple application shows the list of pokemon with their details
 ##### If the next icon appears in the list, it means that the item has already been downloaded and can also be used offline
