@@ -27,7 +27,7 @@ Here the list of al the dependency of the application:
   - Robolectric
   
   ## Architecture
-Clean architecture + MVVM + MVI
+Clean architecture + MVVM
   
   ## Test coverage
 The only integrated Unit test, is located in the Data module and was used to test the correct relationships between the tables (oneToMany & oneToOne)
