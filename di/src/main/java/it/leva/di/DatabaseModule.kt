@@ -1,4 +1,4 @@
-package it.leva.data.di
+package it.leva.di
 
 import androidx.room.Room
 import it.leva.data.persistence.AppDatabase
@@ -9,8 +9,10 @@ import org.koin.dsl.module
 
 val databaseModule = module {
     single {
-        Room.databaseBuilder(androidContext(), AppDatabase::class.java, AppDatabase.DB_NAME)
-            .fallbackToDestructiveMigration().build()
+        val build =
+            Room.databaseBuilder(androidContext(), AppDatabase::class.java, AppDatabase.DB_NAME)
+                .fallbackToDestructiveMigration().build()
+        build
     }
 
     single { get<AppDatabase>().getPokeDao() }
@@ -26,6 +28,4 @@ val databaseModule = module {
             get()
         )
     }
-
-
 }

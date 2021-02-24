@@ -1,4 +1,4 @@
-package it.leva.data.di
+package it.leva.di
 
 import it.leva.data.network.RetrofitBuilder
 import it.leva.data.repository.PokeRepositoryImpl
