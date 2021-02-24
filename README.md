@@ -12,6 +12,7 @@ The application consists of 3 modules:
 
   - Data: To find information
   - Domain: Business logic
+  - Di: Contains domain and data modules  
   - Presentation: To show on device
   
 ## Used dependency
