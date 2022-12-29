@@ -8,7 +8,7 @@ This simple application shows the list of pokemon with their details
 ![N|Solid](https://raw.githubusercontent.com/antolevq/applyJobAssignment/master/presentation/src/main/res/drawable/closed.png) 
 
 ## Multi module application
-The application consists of 3 modules:
+The application consists of 4 modules:
 
   - Data: To find information
   - Domain: Business logic
